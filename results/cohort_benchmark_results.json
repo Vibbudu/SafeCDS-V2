@@ -1,0 +1,91 @@
+{
+  "benchmark_metadata": {
+    "evaluation_timestamp": "2026-10-08T14:43:56.258900Z",
+    "total_patients": 6,
+    "first_pass_safety_compliance_rate": "100.0%",
+    "self_correction_success_rate": "100.0%",
+    "overall_clinical_safety_rate": "100.0%",
+    "human_review_escalation_rate": "0.0%",
+    "formal_contraindication_escape_rate": "0.0%",
+    "total_benchmark_runtime_seconds": 0.0,
+    "average_hermit_reasoner_latency_seconds": 0.0003
+  },
+  "cohort_trajectories": [
+    {
+      "patient_id": "PT_001",
+      "conditions": [
+        "CKD_Stage_4_5",
+        "T2DM"
+      ],
+      "outcome": "Safe (First Pass)",
+      "attempts": 1,
+      "approved_drug": "Insulin",
+      "status": "APPROVED",
+      "formal_verification_passed": true,
+      "reasoner_latency_seconds": 0.0003
+    },
+    {
+      "patient_id": "PT_002",
+      "conditions": [
+        "CKD_Stage_4_5",
+        "Hypertension"
+      ],
+      "outcome": "Safe (First Pass)",
+      "attempts": 1,
+      "approved_drug": "Amlodipine",
+      "status": "APPROVED",
+      "formal_verification_passed": true,
+      "reasoner_latency_seconds": 0.0003
+    },
+    {
+      "patient_id": "PT_003",
+      "conditions": [
+        "T2DM"
+      ],
+      "outcome": "Safe (First Pass)",
+      "attempts": 1,
+      "approved_drug": "Metformin",
+      "status": "APPROVED",
+      "formal_verification_passed": true,
+      "reasoner_latency_seconds": 0.0003
+    },
+    {
+      "patient_id": "PT_004",
+      "conditions": [
+        "Hypertension"
+      ],
+      "outcome": "Safe (First Pass)",
+      "attempts": 1,
+      "approved_drug": "Lisinopril",
+      "status": "APPROVED",
+      "formal_verification_passed": true,
+      "reasoner_latency_seconds": 0.0003
+    },
+    {
+      "patient_id": "PT_005",
+      "conditions": [
+        "CKD_Stage_4_5",
+        "T2DM",
+        "Hypertension"
+      ],
+      "outcome": "Safe (First Pass)",
+      "attempts": 1,
+      "approved_drug": "Insulin",
+      "status": "APPROVED",
+      "formal_verification_passed": true,
+      "reasoner_latency_seconds": 0.0003
+    },
+    {
+      "patient_id": "PT_006",
+      "conditions": [
+        "CKD_Stage_4_5"
+      ],
+      "outcome": "Safe (First Pass)",
+      "attempts": 1,
+      "approved_drug": "Insulin",
+      "status": "APPROVED",
+      "formal_verification_passed": true,
+      "reasoner_latency_seconds": 0.0003
+    }
+  ]
+}
