@@ -1,0 +1,26 @@
+[
+  {
+    "id": "KDIGO_2023_METFORMIN_CKD",
+    "source": "KDIGO 2023 Clinical Practice Guideline",
+    "topic": "Metformin in Chronic Kidney Disease",
+    "text": "Metformin is recommended as first-line therapy for Type 2 Diabetes in patients with CKD when eGFR >= 45 mL/min/1.73 m2. In patients with eGFR < 30 mL/min/1.73 m2 (CKD Stage 4 and Stage 5), Metformin is strictly contraindicated due to the high risk of fatal lactic acidosis. Insulin or alternative therapies should be considered."
+  },
+  {
+    "id": "KDIGO_2023_BP_ADVANCED_CKD",
+    "source": "KDIGO 2023 Clinical Practice Guideline",
+    "topic": "Blood Pressure Management in Advanced CKD",
+    "text": "While ACE inhibitors and ARBs provide renal protection in proteinuric CKD Stages 1-3, initiating or escalating high-dose ACE inhibitors (e.g., Lisinopril) in advanced CKD Stages 4-5 carries severe risks of hyperkalaemia and acute declines in GFR. Dihydropyridine calcium channel blockers (such as Amlodipine) are preferred for blood pressure reduction in advanced renal failure when RAAS blockade cannot be safely monitored."
+  },
+  {
+    "id": "ADA_2024_GLYCEMIC_RENAL",
+    "source": "ADA 2024 Standards of Care in Diabetes",
+    "topic": "Antihyperglycaemic Therapy in Renal Impairment",
+    "text": "Insulin therapy (basal or basal-bolus regimens) remains the gold-standard and universally safe pharmacological intervention for glycaemic management in advanced renal impairment (CKD Stages 4-5), as it does not rely on renal tubular clearance mechanisms that provoke lactic acidosis."
+  },
+  {
+    "id": "ACCAHA_2017_HTN_FIRSTLINE",
+    "source": "ACC/AHA 2017 Hypertension Clinical Practice Guidelines",
+    "topic": "First-Line Hypertension Guidelines",
+    "text": "Primary first-line agents for hypertension in the general adult population include thiazide diuretics, calcium channel blockers (CCBs), and ACE inhibitors or ARBs. For initial monotherapy in uncomplicated hypertension without renal contraindications, any of these classes is acceptable."
+  }
+]
