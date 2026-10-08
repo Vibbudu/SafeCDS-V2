@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://safecds.org/ontologies/cardiometabolic_core.owl#"
+     xml:base="http://safecds.org/ontologies/cardiometabolic_core.owl"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    
+    <owl:Ontology rdf:about="http://safecds.org/ontologies/cardiometabolic_core.owl">
+        <rdfs:comment>SafeCDS Cardiometabolic Multimorbidity Core Safety Ontology</rdfs:comment>
+    </owl:Ontology>
+
+    <!-- /////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////// -->
+
+    <owl:ObjectProperty rdf:about="http://safecds.org/ontologies/cardiometabolic_core.owl#hasCondition">
+        <rdfs:domain rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#Patient"/>
+        <rdfs:range rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#Condition"/>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://safecds.org/ontologies/cardiometabolic_core.owl#hasPrescription">
+        <rdfs:domain rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#Patient"/>
+        <rdfs:range rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#Prescription"/>
+    </owl:ObjectProperty>
+
+    <!-- /////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////// -->
+
+    <owl:Class rdf:about="http://safecds.org/ontologies/cardiometabolic_core.owl#Patient"/>
+    <owl:Class rdf:about="http://safecds.org/ontologies/cardiometabolic_core.owl#Condition"/>
+    <owl:Class rdf:about="http://safecds.org/ontologies/cardiometabolic_core.owl#Prescription"/>
+
+    <!-- Conditions -->
+    <owl:Class rdf:about="http://safecds.org/ontologies/cardiometabolic_core.owl#CKD_Stage_4_5">
+        <rdfs:subClassOf rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#Condition"/>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://safecds.org/ontologies/cardiometabolic_core.owl#T2DM">
+        <rdfs:subClassOf rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#Condition"/>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://safecds.org/ontologies/cardiometabolic_core.owl#Hypertension">
+        <rdfs:subClassOf rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#Condition"/>
+    </owl:Class>
+
+    <!-- Prescriptions -->
+    <owl:Class rdf:about="http://safecds.org/ontologies/cardiometabolic_core.owl#Metformin">
+        <rdfs:subClassOf rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#Prescription"/>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://safecds.org/ontologies/cardiometabolic_core.owl#Lisinopril">
+        <rdfs:subClassOf rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#Prescription"/>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://safecds.org/ontologies/cardiometabolic_core.owl#Insulin">
+        <rdfs:subClassOf rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#Prescription"/>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://safecds.org/ontologies/cardiometabolic_core.owl#Amlodipine">
+        <rdfs:subClassOf rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#Prescription"/>
+    </owl:Class>
+
+    <!-- /////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Safety Contraindication Equivalent Axioms (TBox)
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////// -->
+
+    <!-- UnsafeMetforminPrescription = Patient AND hasCondition some CKD_Stage_4_5 AND hasPrescription some Metformin -->
+    <owl:Class rdf:about="http://safecds.org/ontologies/cardiometabolic_core.owl#UnsafeMetforminPrescription">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://safecds.org/ontologies/cardiometabolic_core.owl#Patient"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#hasCondition"/>
+                        <owl:someValuesFrom rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#CKD_Stage_4_5"/>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#hasPrescription"/>
+                        <owl:someValuesFrom rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#Metformin"/>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:comment>Contraindication: Metformin accumulation in advanced CKD risks fatal lactic acidosis.</rdfs:comment>
+    </owl:Class>
+
+    <!-- UnsafeACEiPrescription = Patient AND hasCondition some CKD_Stage_4_5 AND hasPrescription some Lisinopril -->
+    <owl:Class rdf:about="http://safecds.org/ontologies/cardiometabolic_core.owl#UnsafeACEiPrescription">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://safecds.org/ontologies/cardiometabolic_core.owl#Patient"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#hasCondition"/>
+                        <owl:someValuesFrom rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#CKD_Stage_4_5"/>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#hasPrescription"/>
+                        <owl:someValuesFrom rdf:resource="http://safecds.org/ontologies/cardiometabolic_core.owl#Lisinopril"/>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:comment>Contraindication: ACE inhibitor Lisinopril in advanced CKD risks acute renal decline and severe hyperkalaemia.</rdfs:comment>
+    </owl:Class>
+
+</rdf:RDF>
