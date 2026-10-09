@@ -10,16 +10,18 @@ from src.retrieval.hybrid_retriever import HybridClinicalRetriever
 logger = logging.getLogger("safecds.workflow")
 
 
-class WorkflowState(TypedDict):
+class WorkflowState(TypedDict, total=False):
     """Auditable state schema tracked across LangGraph transitions."""
     patient_id: str
     conditions: List[str]
     clinical_notes: str
     retrieved_evidence: str
+    retrieved_docs: List[Dict[str, Any]]
     proposed_drug: Optional[str]
     hypothesis: Optional[Dict[str, Any]]
     verification_result: Optional[Dict[str, Any]]
     axiom_feedback: List[str]
+    attempts_history: List[Dict[str, Any]]
     retries: int
     max_retries: int
     status: str  # "PENDING", "APPROVED", "ESCALATED_TO_HUMAN"
@@ -92,22 +94,27 @@ class SafeCDSWorkflow:
         state["retries"] = 0
         state["status"] = "PENDING"
         state["axiom_feedback"] = []
+        state["attempts_history"] = []
+        state["retrieved_docs"] = []
         state["audit_trail"] = []
         state["audit_trail"].append({
             "stage": "INGESTION",
-            "message": f"Patient {state['patient_id']} state initialized.",
+            "message": f"Patient {state['patient_id']} state initialized with conditions: {', '.join(state['conditions'])}.",
         })
         return state
 
     def node_retrieve(self, state: WorkflowState) -> WorkflowState:
         """FR2: Hybrid Dense-Sparse Guideline Retrieval with RRF."""
-        query = f"{' '.join(state['conditions'])} {state['clinical_notes']}"
+        query = f"{' '.join(state['conditions'])} {state.get('clinical_notes', '')}"
+        docs = self.retriever.retrieve(query, top_k=3)
+        state["retrieved_docs"] = docs
         evidence = self.retriever.get_evidence_string(query, top_k=3)
         state["retrieved_evidence"] = evidence
         state["audit_trail"].append({
             "stage": "RETRIEVAL",
             "query": query,
             "evidence_length": len(evidence),
+            "retrieved_count": len(docs),
         })
         return state
 
@@ -136,7 +143,7 @@ class SafeCDSWorkflow:
             conditions=state["conditions"],
             proposed_drug=state["proposed_drug"],
         )
-        state["verification_result"] = {
+        res_dict = {
             "is_safe": v_result.is_safe,
             "status": v_result.status,
             "violated_axioms": v_result.violated_axioms,
@@ -144,6 +151,20 @@ class SafeCDSWorkflow:
             "inferred_classes": v_result.inferred_classes,
             "latency_seconds": v_result.latency_seconds,
         }
+        state["verification_result"] = res_dict
+
+        # Record this attempt in attempts_history
+        attempt_record = {
+            "attempt": state["retries"] + 1,
+            "proposed_drug": state["proposed_drug"],
+            "hypothesis": state.get("hypothesis"),
+            "verification": res_dict,
+            "had_feedback": len(state.get("axiom_feedback", [])) > 0,
+        }
+        if "attempts_history" not in state or state["attempts_history"] is None:
+            state["attempts_history"] = []
+        state["attempts_history"].append(attempt_record)
+
         state["audit_trail"].append({
             "stage": "VERIFICATION",
             "attempt": state["retries"] + 1,

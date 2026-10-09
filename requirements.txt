@@ -21,6 +21,10 @@ owlready2>=0.45
 requests>=2.31.0
 httpx>=0.27.0
 
+# Web Application Server & API
+fastapi>=0.110.0
+uvicorn>=0.28.0
+
 # CLI & Terminal Formatting
 rich>=13.7.0
 

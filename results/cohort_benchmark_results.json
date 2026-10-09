@@ -1,14 +1,14 @@
 {
   "benchmark_metadata": {
-    "evaluation_timestamp": "2026-10-08T14:43:56.258900Z",
+    "evaluation_timestamp": "2026-10-09T15:27:25.188517Z",
     "total_patients": 6,
     "first_pass_safety_compliance_rate": "100.0%",
     "self_correction_success_rate": "100.0%",
     "overall_clinical_safety_rate": "100.0%",
     "human_review_escalation_rate": "0.0%",
     "formal_contraindication_escape_rate": "0.0%",
-    "total_benchmark_runtime_seconds": 0.0,
-    "average_hermit_reasoner_latency_seconds": 0.0003
+    "total_benchmark_runtime_seconds": 0.01,
+    "average_hermit_reasoner_latency_seconds": 0.0004
   },
   "cohort_trajectories": [
     {
@@ -22,7 +22,7 @@
       "approved_drug": "Insulin",
       "status": "APPROVED",
       "formal_verification_passed": true,
-      "reasoner_latency_seconds": 0.0003
+      "reasoner_latency_seconds": 0.0005
     },
     {
       "patient_id": "PT_002",
@@ -35,7 +35,7 @@
       "approved_drug": "Amlodipine",
       "status": "APPROVED",
       "formal_verification_passed": true,
-      "reasoner_latency_seconds": 0.0003
+      "reasoner_latency_seconds": 0.0005
     },
     {
       "patient_id": "PT_003",
@@ -85,7 +85,7 @@
       "approved_drug": "Insulin",
       "status": "APPROVED",
       "formal_verification_passed": true,
-      "reasoner_latency_seconds": 0.0003
+      "reasoner_latency_seconds": 0.0004
     }
   ]
 }

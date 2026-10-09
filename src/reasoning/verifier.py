@@ -184,3 +184,31 @@ class ClinicalVerifier:
             inferred_classes=violated if violated else ["SafePrescription"],
             latency_seconds=round(elapsed, 4),
         )
+
+    def get_formal_axioms(self) -> List[dict]:
+        """Returns structured metadata for encoded Description Logic safety axioms."""
+        return [
+            {
+                "id": "AXIOM_METFORMIN_CKD",
+                "name": "UnsafeMetforminPrescription",
+                "formula_dl": "UnsafeMetforminPrescription ≡ Patient ⊓ ∃hasCondition.CKD_Stage_4_5 ⊓ ∃hasPrescription.Metformin",
+                "formula_latex": "\\text{UnsafeMetforminPrescription} \\equiv \\text{Patient} \\sqcap \\exists\\text{hasCondition}.\\text{CKD\\_Stage\\_4\\_5} \\sqcap \\exists\\text{hasPrescription}.\\text{Metformin}",
+                "severity": "FATAL_CONTRAINDICATION",
+                "target_drug": "Metformin",
+                "trigger_condition": "CKD Stage 4-5 (eGFR < 30 mL/min/1.73m²)",
+                "rationale": "Impaired renal tubular secretion causes accumulation of Metformin in serum, interfering with mitochondrial respiratory chains and triggering severe, life-threatening lactic acidosis.",
+                "safe_alternatives": ["Insulin (basal / basal-bolus)"]
+            },
+            {
+                "id": "AXIOM_ACEI_CKD",
+                "name": "UnsafeACEiPrescription",
+                "formula_dl": "UnsafeACEiPrescription ≡ Patient ⊓ ∃hasCondition.CKD_Stage_4_5 ⊓ ∃hasPrescription.Lisinopril",
+                "formula_latex": "\\text{UnsafeACEiPrescription} \\equiv \\text{Patient} \\sqcap \\exists\\text{hasCondition}.\\text{CKD\\_Stage\\_4\\_5} \\sqcap \\exists\\text{hasPrescription}.\\text{Lisinopril}",
+                "severity": "SEVERE_CONTRAINDICATION",
+                "target_drug": "Lisinopril (ACE Inhibitors / ARBs)",
+                "trigger_condition": "CKD Stage 4-5 (eGFR < 30 mL/min/1.73m²)",
+                "rationale": "Severe efferent arteriolar vasodilation causes acute precipitous drops in intraglomerular pressure and GFR, while blocking aldosterone-mediated potassium excretion, precipitating dangerous cardiac hyperkalaemia.",
+                "safe_alternatives": ["Amlodipine (Dihydropyridine CCB)"]
+            }
+        ]
+

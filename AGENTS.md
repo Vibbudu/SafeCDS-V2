@@ -52,6 +52,9 @@ SafeCDS/
 ├── results/
 │   └── cohort_benchmark_results.json  # Persisted audit trails & benchmark metrics
 ├── src/
+│   ├── api/
+│   │   ├── app.py                     # FastAPI server for local processing & REST endpoints
+│   │   └── static/                    # Presentation UI (Inter & Instrument Serif, light mode)
 │   ├── agents/
 │   │   ├── llm_client.py              # Ollama client with Pydantic V2 parser
 │   │   └── workflow.py                # LangGraph state machine & routing logic
@@ -61,6 +64,7 @@ SafeCDS/
 │   │   └── verifier.py                # HermiT DL reasoner in isolated worlds
 │   └── retrieval/
 │       └── hybrid_retriever.py        # FAISS dense + BM25 sparse + RRF (k=60)
+├── main_web.py                        # Local interactive presentation web runner (Working Model)
 ├── main.py                            # CLI single-patient runner
 ├── test_retrieval.py                  # Unit verification for hybrid retrieval
 ├── requirements.txt                   # Dependency specifications

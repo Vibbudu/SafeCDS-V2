@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeCDS V2 — Verifiable Neuro-Symbolic Clinical Reasoning</title>
+  
+  <!-- Fonts: Instrument Serif & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- KaTeX for Description Logic formulas -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- Ambient Film Grain Texture -->
+  <div class="film-grain-overlay" aria-hidden="true"></div>
+
+  <!-- Top Navigation & Live Engine Status Bar -->
+  <header class="top-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <div class="brand-title">
+          <span class="brand-name instrument-serif">SafeCDS</span>
+          <span class="version-tag">v2.0</span>
+        </div>
+        <p class="brand-subtitle">Fail-Closed Neuro-Symbolic Decision Support for Cardiometabolic Multimorbidity</p>
+      </div>
+
+      <!-- Live Engine Telemetry Pills -->
+      <div class="engine-telemetry">
+        <div class="telemetry-pill" id="pill-reasoner">
+          <span class="pill-dot status-green"></span>
+          <span class="pill-label">HermiT OWL DL:</span>
+          <span class="pill-val" id="val-reasoner">Isolated World</span>
+        </div>
+        <div class="telemetry-pill" id="pill-llm">
+          <span class="pill-dot status-amber" id="dot-llm"></span>
+          <span class="pill-label">Neural Proposer:</span>
+          <span class="pill-val" id="val-llm">Detecting...</span>
+        </div>
+        <div class="telemetry-pill" id="pill-rag">
+          <span class="pill-dot status-green"></span>
+          <span class="pill-label">Hybrid RAG:</span>
+          <span class="pill-val" id="val-rag">FAISS + BM25 (RRF)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="main-container">
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 1: LIVE INTERACTIVE CASE SOLVER (WORKING MODEL DEMO) -->
+    <!-- ========================================================================= -->
+    <section id="view-solver" class="content-view active-view">
+      
+      <!-- View Introduction -->
+      <div class="view-header">
+        <div class="view-title-wrap">
+          <h1 class="view-title instrument-serif">Live Case Solver & Symbolic Gatekeeper</h1>
+          <p class="view-desc">
+            Observe the fail-closed neuro-symbolic pipeline execute in real time. Neural proposals are formally verified by HermiT Description Logic reasoners in ephemeral memory worlds, with automated closed-loop self-correction upon detected contraindications.
+          </p>
+        </div>
+      </div>
+
+      <div class="solver-grid">
+        
+        <!-- Left Column: Patient Intake & Case Builder -->
+        <div class="solver-left">
+          
+          <!-- Preset Selector Card -->
+          <div class="card patient-intake-card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <i data-lucide="user-check" class="card-icon"></i>
+                <h3 class="card-title">Patient Profile Intake</h3>
+              </div>
+              <span class="card-badge">Coded Presentation</span>
+            </div>
+
+            <p class="intake-instructions">Select a benchmark multimorbid presentation or build a custom patient case below:</p>
+
+            <!-- Quick Preset Buttons -->
+            <div class="preset-buttons-grid" id="preset-buttons-container">
+              <!-- Rendered via JS -->
+            </div>
+
+            <!-- Active Case Details Card -->
+            <div class="active-patient-box">
+              <div class="patient-id-bar">
+                <span class="patient-tag" id="display-patient-id">PT_002</span>
+                <span class="patient-title" id="display-patient-name">Renal Failure & Hypertension</span>
+              </div>
+              
+              <div class="clinical-conditions-row" id="display-conditions-chips">
+                <!-- Condition chips rendered via JS -->
+              </div>
+
+              <div class="notes-preview-wrap">
+                <label class="field-label">Clinical Presentation Narrative:</label>
+                <textarea id="input-clinical-notes" class="narrative-textarea" rows="3"></textarea>
+              </div>
+
+              <!-- Interactive Vitals Sliders -->
+              <div class="vitals-panel">
+                <div class="vital-row">
+                  <div class="vital-meta">
+                    <span class="vital-name">eGFR (Renal Filtration)</span>
+                    <span class="vital-val-badge" id="val-egfr">14 mL/min/1.73m² (Stage 5 CKD)</span>
+                  </div>
+                  <input type="range" id="slider-egfr" min="10" max="110" value="14" class="slider-control">
+                </div>
+
+                <div class="vital-row">
+                  <div class="vital-meta">
+                    <span class="vital-name">Systolic Blood Pressure</span>
+                    <span class="vital-val-badge" id="val-sbp">165 mmHg (Stage 2 HTN)</span>
+                  </div>
+                  <input type="range" id="slider-sbp" min="100" max="200" value="165" class="slider-control">
+                </div>
+
+                <div class="vital-row">
+                  <div class="vital-meta">
+                    <span class="vital-name">HbA1c (Glycemic Index)</span>
+                    <span class="vital-val-badge" id="val-hba1c">8.5% (Uncontrolled T2DM)</span>
+                  </div>
+                  <input type="range" id="slider-hba1c" min="5" max="14" step="0.1" value="8.5" class="slider-control">
+                </div>
+              </div>
+
+              <!-- Run Action Button -->
+              <button id="btn-run-solver" class="btn-primary">
+                <i data-lucide="play" class="btn-icon"></i>
+                <span id="btn-run-solver-text">Execute Neuro-Symbolic Verification</span>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Formal Guarantee Callout Card -->
+          <div class="card guarantee-card">
+            <div class="guarantee-header">
+              <i data-lucide="shield-check" class="guarantee-icon"></i>
+              <div class="guarantee-title-group">
+                <span class="guarantee-heading">Fail-Closed Invariant (NFR1)</span>
+                <span class="guarantee-sub">Formal Contraindication Escape Rate: <strong>0.0%</strong></span>
+              </div>
+            </div>
+            <p class="guarantee-text">
+              Under no circumstances can an unsafe medication (such as Metformin or Lisinopril in Stage 4-5 CKD) be output to a physician. The Description Logic reasoner provides mathematical soundness guarantees over defined $\mathcal{ALC}$ / $\mathcal{SROIQ}$ axioms.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Step-by-Step Execution Stepper & Self-Correction Visualizer -->
+        <div class="solver-right">
+          
+          <!-- Execution Stepper Progress Bar -->
+          <div class="stepper-progress-card">
+            <div class="stepper-steps">
+              <div class="step-item active" id="step-node-ingest">
+                <span class="step-num">1</span>
+                <span class="step-label">Ingest</span>
+              </div>
+              <div class="step-divider"></div>
+              <div class="step-item" id="step-node-retrieve">
+                <span class="step-num">2</span>
+                <span class="step-label">RAG (RRF)</span>
+              </div>
+              <div class="step-divider"></div>
+              <div class="step-item" id="step-node-generate">
+                <span class="step-num">3</span>
+                <span class="step-label">Neural Proposer</span>
+              </div>
+              <div class="step-divider"></div>
+              <div class="step-item" id="step-node-verify">
+                <span class="step-num">4</span>
+                <span class="step-label">HermiT DL</span>
+              </div>
+              <div class="step-divider"></div>
+              <div class="step-item" id="step-node-feedback">
+                <span class="step-num">5</span>
+                <span class="step-label">Self-Correct</span>
+              </div>
+              <div class="step-divider"></div>
+              <div class="step-item" id="step-node-finalize">
+                <span class="step-num">6</span>
+                <span class="step-label">Certified Plan</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Output Results Stream -->
+          <div id="solver-results-stream">
+            
+            <!-- Default Welcome State Placeholder -->
+            <div class="empty-state-card" id="solver-empty-state">
+              <i data-lucide="cpu" class="empty-icon"></i>
+              <h3 class="empty-title instrument-serif">Ready for Clinical Case Execution</h3>
+              <p class="empty-text">Click "Execute Neuro-Symbolic Verification" to launch the hybrid RAG retrieval, neural hypothesis generation, isolated HermiT reasoning pass, and closed-loop self-correction cycle.</p>
+            </div>
+
+            <!-- Dynamic Execution Panels Container -->
+            <div id="solver-dynamic-panels" class="dynamic-panels hidden">
+              
+              <!-- Certified Decision Hero Banner -->
+              <div class="card verdict-card" id="verdict-banner">
+                <!-- Rendered dynamically -->
+              </div>
+
+              <!-- Closed-Loop Self-Correction Visualizer (Before & After) -->
+              <div class="card correction-cycle-card" id="correction-cycle-panel">
+                <!-- Rendered dynamically if retries > 0 -->
+              </div>
+
+              <!-- Stage 2: Retrieved Guideline Evidence (RAG) -->
+              <div class="card stage-card" id="rag-evidence-panel">
+                <div class="card-header">
+                  <div class="card-title-group">
+                    <i data-lucide="book-open" class="card-icon"></i>
+                    <h3 class="card-title">Retrieved Clinical Guidelines (Hybrid RRF k=60)</h3>
+                  </div>
+                  <span class="card-badge" id="rag-docs-count">3 Evidence Passages</span>
+                </div>
+                <div class="guideline-passages-list" id="rag-passages-container">
+                  <!-- Injected via JS -->
+                </div>
+              </div>
+
+              <!-- Stage 3: Neural Proposal & Pydantic Schema Contract -->
+              <div class="card stage-card" id="neural-proposal-panel">
+                <div class="card-header">
+                  <div class="card-title-group">
+                    <i data-lucide="sparkles" class="card-icon"></i>
+                    <h3 class="card-title">Neural Hypothesis Proposal (Pydantic V2 Contract)</h3>
+                  </div>
+                  <span class="card-badge" id="hypothesis-model-tag">LLaMA-3.2:3b (T=0.1)</span>
+                </div>
+                <div class="proposal-details-grid" id="proposal-details-container">
+                  <!-- Injected via JS -->
+                </div>
+              </div>
+
+              <!-- Stage 4: HermiT Formal DL Verification -->
+              <div class="card stage-card" id="symbolic-verification-panel">
+                <div class="card-header">
+                  <div class="card-title-group">
+                    <i data-lucide="check-circle-2" class="card-icon"></i>
+                    <h3 class="card-title">Formal DL Reasoner Gatekeeper</h3>
+                  </div>
+                  <span class="card-badge">Isolated In-Memory World</span>
+                </div>
+                <div class="verification-details" id="verification-details-container">
+                  <!-- Injected via JS -->
+                </div>
+              </div>
+
+              <!-- Full Audit Trail Accordion -->
+              <div class="card audit-trail-card">
+                <div class="card-header cursor-pointer" id="btn-toggle-audit">
+                  <div class="card-title-group">
+                    <i data-lucide="list-tree" class="card-icon"></i>
+                    <h3 class="card-title">Chronological LangGraph Audit Trail</h3>
+                  </div>
+                  <span class="card-badge" id="audit-steps-count">6 Transitions</span>
+                </div>
+                <div class="audit-log-container" id="audit-log-list">
+                  <!-- Injected via JS -->
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 2: COHORT BENCHMARK VALIDATION SUITE -->
+    <!-- ========================================================================= -->
+    <section id="view-benchmark" class="content-view">
+      <div class="view-header">
+        <div class="view-title-wrap">
+          <h1 class="view-title instrument-serif">Automated Cohort Benchmark Validation</h1>
+          <p class="view-desc">
+            Batch evaluation across the cardiometabolic multimorbidity cohort (PT_001 through PT_006). Empirically measures first-pass compliance, automated self-correction recovery, and formal contraindication escape rate.
+          </p>
+        </div>
+        <button id="btn-run-benchmark" class="btn-primary">
+          <i data-lucide="refresh-cw" class="btn-icon"></i>
+          <span id="btn-run-benchmark-text">Execute Full Benchmark</span>
+        </button>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="kpi-grid">
+        <div class="card kpi-card">
+          <span class="kpi-label">Safety Compliance Rate</span>
+          <span class="kpi-value instrument-serif" id="kpi-safety-rate">100.0%</span>
+          <span class="kpi-sub positive"><i data-lucide="check"></i> 6 of 6 Cases Safe</span>
+        </div>
+
+        <div class="card kpi-card">
+          <span class="kpi-label">Self-Correction Success</span>
+          <span class="kpi-value instrument-serif" id="kpi-correction-rate">100.0%</span>
+          <span class="kpi-sub positive"><i data-lucide="refresh-cw"></i> 100% Recovery from Rejections</span>
+        </div>
+
+        <div class="card kpi-card">
+          <span class="kpi-label">Formal Escape Rate</span>
+          <span class="kpi-value instrument-serif" id="kpi-escape-rate">0.0%</span>
+          <span class="kpi-sub positive"><i data-lucide="shield"></i> HermiT Soundness Guarantee</span>
+        </div>
+
+        <div class="card kpi-card">
+          <span class="kpi-label">Total Execution Latency</span>
+          <span class="kpi-value instrument-serif" id="kpi-runtime">41.85 s</span>
+          <span class="kpi-sub"><i data-lucide="zap"></i> Avg Reasoner: 0.77s/trial</span>
+        </div>
+      </div>
+
+      <!-- Cohort Trajectories Table -->
+      <div class="card table-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <i data-lucide="table" class="card-icon"></i>
+            <h3 class="card-title">Patient Trajectories & Verification Outcomes</h3>
+          </div>
+          <span class="card-badge" id="table-timestamp">Validated Run</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="benchmark-table">
+            <thead>
+              <tr>
+                <th>Patient ID</th>
+                <th>Diagnosed Conditions</th>
+                <th>Attempts</th>
+                <th>Verification Status</th>
+                <th>Approved Medication</th>
+                <th>Formal DL Guarantee</th>
+              </tr>
+            </thead>
+            <tbody id="benchmark-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 3: FORMAL DESCRIPTION LOGIC SAFETY AXIOMS EXPLORER -->
+    <!-- ========================================================================= -->
+    <section id="view-axioms" class="content-view">
+      <div class="view-header">
+        <div class="view-title-wrap">
+          <h1 class="view-title instrument-serif">Formal Description Logic Safety Axioms</h1>
+          <p class="view-desc">
+            Symbolic knowledge base defined in OWL 2 DL ($\mathcal{ALC}$ / $\mathcal{SROIQ}$) stored in <code>ontologies/cardiometabolic_core.owl</code>. The HermiT automated reasoner enforces these contraindication equivalence axioms over candidate prescriptions.
+          </p>
+        </div>
+      </div>
+
+      <div class="axioms-grid" id="axioms-container">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 4: CLINICAL PRACTICE GUIDELINES BROWSER -->
+    <!-- ========================================================================= -->
+    <section id="view-guidelines" class="content-view">
+      <div class="view-header">
+        <div class="view-title-wrap">
+          <h1 class="view-title instrument-serif">Curated Clinical Practice Guidelines</h1>
+          <p class="view-desc">
+            Authoritative guideline evidence base from KDIGO (Kidney Disease: Improving Global Outcomes), ADA (American Diabetes Association), and ACC/AHA (American College of Cardiology / American Heart Association).
+          </p>
+        </div>
+      </div>
+
+      <div class="guidelines-search-wrap">
+        <i data-lucide="search" class="search-icon"></i>
+        <input type="text" id="input-guideline-search" placeholder="Search guidelines by disease, medication, or recommendation text..." class="search-input">
+      </div>
+
+      <div class="guidelines-cards-grid" id="guidelines-container">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- FLOATING BOTTOM GLASS CAPSULE DOCK (Inspired by C:\vibbudu_website) -->
+  <!-- ========================================================================= -->
+  <div class="bottom-capsule" role="navigation" aria-label="Main Navigation">
+    <button class="capsule-link active" data-target="view-solver">
+      <i data-lucide="play-circle" class="capsule-icon"></i>
+      <span>Case Solver</span>
+    </button>
+    <button class="capsule-link" data-target="view-benchmark">
+      <i data-lucide="bar-chart-3" class="capsule-icon"></i>
+      <span>Benchmark</span>
+    </button>
+    <button class="capsule-link" data-target="view-axioms">
+      <i data-lucide="binary" class="capsule-icon"></i>
+      <span>Safety Axioms</span>
+    </button>
+    <button class="capsule-link" data-target="view-guidelines">
+      <i data-lucide="book-marked" class="capsule-icon"></i>
+      <span>Guidelines</span>
+    </button>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

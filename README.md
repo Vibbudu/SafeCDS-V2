@@ -132,6 +132,9 @@ SafeCDS/
 ├── results/
 │   └── cohort_benchmark_results.json   # Persisted evaluation metrics and audit logs
 ├── src/
+│   ├── api/
+│   │   ├── app.py                      # FastAPI local processing & REST endpoints
+│   │   └── static/                     # Presentation UI (Inter & Instrument Serif, light mode)
 │   ├── agents/
 │   │   ├── llm_client.py               # Ollama client with strict Pydantic V2 parser
 │   │   └── workflow.py                 # LangGraph state machine & routing logic
@@ -141,6 +144,7 @@ SafeCDS/
 │   │   └── verifier.py                 # Isolated HermiT DL reasoning gatekeeper
 │   └── retrieval/
 │       └── hybrid_retriever.py         # FAISS + BM25 hybrid RAG with RRF (k=60)
+├── main_web.py                         # Local interactive presentation web runner (Working Model)
 ├── main.py                             # Single-patient CLI demonstration runner
 ├── test_retrieval.py                   # Retrieval verification test script
 ├── requirements.txt                    # Python dependency specifications
@@ -175,19 +179,26 @@ ollama pull llama3.2:3b
 ollama serve
 ```
 
-### 3. Run Guideline Retrieval Verification
+### 3. Launch Interactive Presentation Web Model (Working Model)
+
+```bash
+python main_web.py
+```
+*Opens the local presentation app at `http://127.0.0.1:8000` with the live interactive case solver, closed-loop self-correction visualizer, cohort benchmark suite, and formal Description Logic axioms explorer.*
+
+### 4. Run Guideline Retrieval Verification
 
 ```bash
 python test_retrieval.py
 ```
 
-### 4. Run Single Patient Demonstration
+### 5. Run Single Patient Demonstration (CLI)
 
 ```bash
 python main.py --patient-id PT_002 --conditions CKD_Stage_4_5 Hypertension
 ```
 
-### 5. Run Cohort Benchmark Suite
+### 6. Run Cohort Benchmark Suite (CLI)
 
 ```bash
 python -m src.evaluation.run_benchmark

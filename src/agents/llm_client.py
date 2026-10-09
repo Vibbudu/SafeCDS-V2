@@ -194,3 +194,35 @@ INSTRUCTIONS:
             clinical_rationale="Conservative metabolic management.",
             guideline_reference="KDIGO 2023",
         )
+
+    def check_health(self) -> dict:
+        """Check if local Ollama daemon is reachable and responding."""
+        try:
+            import requests
+
+            resp = requests.get(f"{self.base_url}/api/tags", timeout=1.5)
+            if resp.status_code == 200:
+                models = [m.get("name", "") for m in resp.json().get("models", [])]
+                has_target = any(self.model_name in m for m in models)
+                return {
+                    "connected": True,
+                    "provider": "Local Ollama Daemon",
+                    "base_url": self.base_url,
+                    "target_model": self.model_name,
+                    "model_available": has_target,
+                    "installed_models": models,
+                    "mode": "ACTIVE_OLLAMA" if has_target else "LOCAL_DETERMINISTIC_SAFE",
+                }
+        except Exception:
+            pass
+
+        return {
+            "connected": False,
+            "provider": "Deterministic Guideline Engine (Zero-Latency Local Fallback)",
+            "base_url": self.base_url,
+            "target_model": self.model_name,
+            "model_available": False,
+            "installed_models": [],
+            "mode": "LOCAL_DETERMINISTIC_SAFE",
+        }
+
