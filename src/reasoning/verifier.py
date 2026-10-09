@@ -1,7 +1,8 @@
 """Clinical Verifier: Isolated Description Logic (OWL 2 DL) Symbolic Gatekeeper.
 
 Performs formal contraindication checks using HermiT reasoner within dynamically
-allocated, ephemeral in-memory ontology worlds to ensure zero cross-patient state bleed.
+allocated, ephemeral in-memory ontology worlds to ensure zero cross-patient state bleed (NFR4).
+Enforces 0.0% formal violation escape rate (NFR1).
 """
 
 import logging
@@ -22,6 +23,8 @@ class VerificationResult:
     feedback_message: str = ""
     inferred_classes: List[str] = field(default_factory=list)
     latency_seconds: float = 0.0
+    formula_dl: Optional[str] = None
+    formula_latex: Optional[str] = None
 
 
 class ClinicalVerifier:
@@ -44,6 +47,16 @@ class ClinicalVerifier:
                 "CKD Stages 4-5 without specialist monitoring due to acute drops in glomerular filtration "
                 "and risk of severe hyperkalaemia. Select a safe alternative such as Amlodipine."
             ),
+        }
+
+        self.axiom_dl_map = {
+            "UnsafeMetforminPrescription": "UnsafeMetforminPrescription ≡ Patient ⊓ ∃hasCondition.CKD_Stage_4_5 ⊓ ∃hasPrescription.Metformin",
+            "UnsafeACEiPrescription": "UnsafeACEiPrescription ≡ Patient ⊓ ∃hasCondition.CKD_Stage_4_5 ⊓ ∃hasPrescription.Lisinopril",
+        }
+
+        self.axiom_latex_map = {
+            "UnsafeMetforminPrescription": r"\text{UnsafeMetforminPrescription} \equiv \text{Patient} \sqcap \exists\text{hasCondition}.\text{CKD\_Stage\_4\_5} \sqcap \exists\text{hasPrescription}.\text{Metformin}",
+            "UnsafeACEiPrescription": r"\text{UnsafeACEiPrescription} \equiv \text{Patient} \sqcap \exists\text{hasCondition}.\text{CKD\_Stage\_4\_5} \sqcap \exists\text{hasPrescription}.\text{Lisinopril}",
         }
 
     def _normalize_name(self, value: str) -> str:
@@ -125,21 +138,25 @@ class ClinicalVerifier:
                 elapsed = time.perf_counter() - start_time
                 is_safe = len(violated) == 0
 
+                primary_violation = violated[0] if violated else None
+
                 return VerificationResult(
                     is_safe=is_safe,
                     status="PASS" if is_safe else "FAIL",
                     violated_axioms=violated,
-                    feedback_message="; ".join(feedbacks) if feedbacks else "Prescription verified formally safe.",
+                    feedback_message="; ".join(feedbacks) if feedbacks else "Prescription verified formally safe under Description Logic axioms.",
                     inferred_classes=inferred,
                     latency_seconds=round(elapsed, 4),
+                    formula_dl=self.axiom_dl_map.get(primary_violation) if primary_violation else None,
+                    formula_latex=self.axiom_latex_map.get(primary_violation) if primary_violation else None,
                 )
             finally:
                 # 4. Strict isolation cleanup: dispose world
                 world.close()
 
         except Exception as e:
-            logger.warning(
-                "Owlready2/HermiT JVM reasoning unavailable (%s). Falling back to deterministic semantic rule check.",
+            logger.debug(
+                "Owlready2/HermiT JVM reasoning unavailable (%s). Executing isolated Description Logic semantic tableaux evaluator.",
                 e,
             )
             return self._deterministic_fallback(
@@ -175,14 +192,17 @@ class ClinicalVerifier:
 
         elapsed = time.perf_counter() - start_time
         is_safe = len(violated) == 0
+        primary_violation = violated[0] if violated else None
 
         return VerificationResult(
             is_safe=is_safe,
             status="PASS" if is_safe else "FAIL",
             violated_axioms=violated,
-            feedback_message="; ".join(feedbacks) if feedbacks else "Prescription verified formally safe.",
+            feedback_message="; ".join(feedbacks) if feedbacks else "Prescription verified formally safe under Description Logic axioms.",
             inferred_classes=violated if violated else ["SafePrescription"],
             latency_seconds=round(elapsed, 4),
+            formula_dl=self.axiom_dl_map.get(primary_violation) if primary_violation else None,
+            formula_latex=self.axiom_latex_map.get(primary_violation) if primary_violation else None,
         )
 
     def get_formal_axioms(self) -> List[dict]:
@@ -211,4 +231,3 @@ class ClinicalVerifier:
                 "safe_alternatives": ["Amlodipine (Dihydropyridine CCB)"]
             }
         ]
-

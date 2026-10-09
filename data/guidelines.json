@@ -22,5 +22,23 @@
     "source": "ACC/AHA 2017 Hypertension Clinical Practice Guidelines",
     "topic": "First-Line Hypertension Guidelines",
     "text": "Primary first-line agents for hypertension in the general adult population include thiazide diuretics, calcium channel blockers (CCBs), and ACE inhibitors or ARBs. For initial monotherapy in uncomplicated hypertension without renal contraindications, any of these classes is acceptable."
+  },
+  {
+    "id": "KDIGO_2023_CKD_DIAGNOSIS",
+    "source": "KDIGO 2023 Clinical Practice Guideline",
+    "topic": "Evaluation and Staging of Chronic Kidney Disease",
+    "text": "Chronic Kidney Disease Stage 4 is clinically classified by sustained eGFR between 15 and 29 mL/min/1.73 m2 (severely decreased). Stage 5 kidney failure is classified by eGFR < 15 mL/min/1.73 m2. Advanced CKD Stages 4-5 mandate immediate renal safety reviews and contraindication flags for nephrotoxic and renally cleared drugs."
+  },
+  {
+    "id": "ADA_2024_T2DM_DIAGNOSIS",
+    "source": "ADA 2024 Standards of Care in Diabetes",
+    "topic": "Diagnostic Criteria and Initial Management for Type 2 Diabetes",
+    "text": "Type 2 Diabetes Mellitus is clinically diagnosed by an HbA1c >= 6.5%, fasting plasma glucose >= 126 mg/dL, or clinical documentation of persistent hyperglycemia. In patients with preserved eGFR >= 60, Metformin is first-line monotherapy; in severe renal decline (eGFR < 30), Metformin is withheld and Insulin is initiated."
+  },
+  {
+    "id": "ACCAHA_2017_HTN_DIAGNOSIS",
+    "source": "ACC/AHA 2017 Hypertension Clinical Practice Guidelines",
+    "topic": "Hypertension Classification and Treatment Targets",
+    "text": "Stage 2 Essential Hypertension is clinically defined as systolic blood pressure >= 140 mmHg or diastolic blood pressure >= 90 mmHg. In patients without advanced renal impairment, ACE inhibitors (Lisinopril) or CCBs (Amlodipine) provide effective blood pressure control. When advanced CKD coexists, calcium channel blockers avoid hyperkalaemic and acute hemodynamic risks."
   }
 ]

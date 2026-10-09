@@ -357,6 +357,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const isApproved = result.status === "APPROVED";
     const hyp = result.final_hypothesis || {};
+    const diags = (result.inferred_diagnosis && result.inferred_diagnosis.length > 0)
+      ? result.inferred_diagnosis.join(" • ")
+      : (result.conditions || []).join(", ").replace(/_/g, " ");
 
     banner.innerHTML = `
       <div class="verdict-left">
@@ -364,7 +367,10 @@ document.addEventListener("DOMContentLoaded", () => {
           <i data-lucide="${isApproved ? "check-circle-2" : "alert-triangle"}"></i>
           ${isApproved ? "Formal Verification: APPROVED" : "ESCALATED TO HUMAN CLINICIAN"}
         </span>
-        <h2 class="verdict-drug-name instrument-serif">${result.approved_drug || "No Drug Approved"}</h2>
+        <div style="margin-top: 8px; font-size: 0.9rem; color: var(--text-secondary);">
+          <span style="font-weight: 600; color: var(--text-primary); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Verified Diagnosis:</span> ${diags}
+        </div>
+        <h2 class="verdict-drug-name instrument-serif">${result.approved_drug || result.proposed_treatment || "No Drug Approved"}</h2>
         <p class="verdict-regimen">${hyp.dosage_or_regimen || "Prescription verified formally safe under Description Logic axioms."}</p>
       </div>
       <div class="verdict-right">
@@ -457,10 +463,18 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!container) return;
 
     const hyp = result.final_hypothesis || {};
+    const diags = (hyp.diagnosis && hyp.diagnosis.length > 0)
+      ? hyp.diagnosis.join(", ")
+      : (result.inferred_diagnosis || []).join(", ");
+
     container.innerHTML = `
+      <div class="proposal-item full-width">
+        <span class="proposal-key">Verified Clinical Diagnosis</span>
+        <span class="proposal-val full-width" style="font-weight: 600; color: var(--text-primary);">${diags || "Unspecified"}</span>
+      </div>
       <div class="proposal-item">
-        <span class="proposal-key">Recommended Medication</span>
-        <span class="proposal-val">${hyp.recommended_drug || result.approved_drug || "None"}</span>
+        <span class="proposal-key">Proposed Treatment</span>
+        <span class="proposal-val">${hyp.proposed_treatment || hyp.recommended_drug || result.approved_drug || "None"}</span>
       </div>
       <div class="proposal-item">
         <span class="proposal-key">Dosage & Administration</span>
@@ -584,9 +598,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     trajs.forEach((t) => {
       const tr = document.createElement("tr");
+      const diags = (t.inferred_diagnosis && t.inferred_diagnosis.length > 0)
+        ? t.inferred_diagnosis.join(", ")
+        : (t.ground_truth_conditions || t.conditions || []).join(", ").replace(/_/g, " ");
       tr.innerHTML = `
         <td class="patient-cell">${t.patient_id}</td>
-        <td>${(t.conditions || []).join(", ").replace(/_/g, " ")}</td>
+        <td><strong>${diags}</strong></td>
         <td>${t.attempts || 1}</td>
         <td><span class="table-status-pill ${t.status === "APPROVED" ? "approved" : "escalated"}">${t.status}</span></td>
         <td><strong>${t.approved_drug || "None"}</strong></td>

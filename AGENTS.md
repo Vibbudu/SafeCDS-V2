@@ -8,7 +8,7 @@
 
 ## 1. System Mission & Technical Overview
 
-**SafeCDS** is an on-premise, fail-closed **Neuro-Symbolic Agentic RAG Framework** engineered for verifiable decision reasoning in **Cardiometabolic Multimorbidity**.
+**SafeCDS** is an on-premise, fail-closed **Neuro-Symbolic Agentic Decision Support Framework** engineered for verifiable clinical diagnosis and safe prescribing in **Cardiometabolic Multimorbidity**.
 
 ### The Core Problem
 In multimorbid clinical presentations—such as concurrent **Type 2 Diabetes Mellitus (T2DM)**, **Chronic Kidney Disease (CKD Stages 4–5)**, and **Essential Hypertension (HTN)**—disease-specific clinical practice guidelines conflict:
@@ -17,9 +17,9 @@ In multimorbid clinical presentations—such as concurrent **Type 2 Diabetes Mel
 - Guidelines from specialized bodies (**ADA**, **KDIGO**, **ACC/AHA**) operate in silos and fail when naive generative agents attempt cross-guideline synthesis.
 
 ### The Neuro-Symbolic Solution
-- **Neural Layer (Hypothesis Proposer)**: Local LLM (`LLaMA-3.2:3b` via Ollama) retrieves authoritative guidelines via dense-sparse RAG with Reciprocal Rank Fusion ($k=60$) and generates structured medication hypotheses.
-- **Symbolic Layer (Formal Gatekeeper)**: Embedded Description Logic reasoner (**HermiT OWL 2 DL**) verifies candidate drugs against formal clinical safety axioms ($\mathcal{ALC}$ / $\mathcal{SROIQ}$).
-- **Closed-Loop Self-Correction**: When contraindications are detected, violated axioms are translated into natural language feedback and injected back into a **LangGraph state machine** for automated correction.
+- **Neural Layer (Diagnostic & Hypothesis Proposer)**: Local LLM (`LLaMA-3.2:3b` via Ollama) retrieves authoritative guidelines via dense-sparse RAG with Reciprocal Rank Fusion ($k=60$), dynamically infers verified clinical diagnoses, and generates structured medication proposals.
+- **Symbolic Layer (Formal Gatekeeper)**: Embedded Description Logic reasoner (**HermiT OWL 2 DL**) verifies candidate drugs against formal clinical safety axioms ($\mathcal{ALC}$ / $\mathcal{SROIQ}$) in ephemeral, isolated memory worlds.
+- **Closed-Loop Self-Correction**: When contraindications are detected, violated axioms are translated into natural language feedback and injected back into a **LangGraph state machine** for automated correction (max 3 retries).
 
 ---
 
@@ -34,9 +34,11 @@ When developing or modifying SafeCDS, all contributors and AI assistants must st
 3. **100% On-Premise Privacy (NFR5)**:
    Patient and clinical data must never leave the local environment. LLM inference runs via local Ollama (`localhost:11434`), and OWL reasoning runs locally via JVM HermiT. Zero external network API calls during inference.
 4. **Strict Schema Contracts (NFR6)**:
-   All generative outputs must strictly adhere to the `PrescriptionHypothesis` Pydantic V2 schema. Unstructured free prose is disallowed for candidate proposals.
+   All generative outputs must strictly adhere to the `ClinicalHypothesis` Pydantic V2 schema (`diagnosis`, `clinical_rationale`, `proposed_treatment`). Unstructured free prose is disallowed for candidate proposals.
 5. **Zero Formal Escape Rate (NFR1)**:
    The formal escape rate must remain **0.0%**. The HermiT reasoner provides sound mathematical guarantees for encoded contraindications.
+6. **No Mocking or Hardcoding**:
+   Do NOT mock or hardcode test cases to return static strings. All responses must be dynamically derived through retrieval, neural hypothesis generation, and formal symbolic verification.
 
 ---
 
@@ -45,7 +47,7 @@ When developing or modifying SafeCDS, all contributors and AI assistants must st
 ```text
 SafeCDS/
 ├── data/
-│   ├── cohort.json                    # Benchmark validation patient cohort
+│   ├── cohort.json                    # Benchmark validation patient cohort (with vitals/labs)
 │   └── guidelines.json                # Curated passages from KDIGO, ADA, ACC/AHA
 ├── ontologies/
 │   └── cardiometabolic_core.owl       # Formal OWL 2 DL TBox axioms & classes
@@ -56,7 +58,7 @@ SafeCDS/
 │   │   ├── app.py                     # FastAPI server for local processing & REST endpoints
 │   │   └── static/                    # Presentation UI (Inter & Instrument Serif, light mode)
 │   ├── agents/
-│   │   ├── llm_client.py              # Ollama client with Pydantic V2 parser
+│   │   ├── llm_client.py              # Ollama / Dynamic inference with ClinicalHypothesis
 │   │   └── workflow.py                # LangGraph state machine & routing logic
 │   ├── evaluation/
 │   │   └── run_benchmark.py           # Automated cohort benchmark runner
@@ -67,6 +69,8 @@ SafeCDS/
 ├── main_web.py                        # Local interactive presentation web runner (Working Model)
 ├── main.py                            # CLI single-patient runner
 ├── test_retrieval.py                  # Unit verification for hybrid retrieval
+├── tests/
+│   └── test_api.py                    # Test suite for FastAPI endpoints & pipeline
 ├── requirements.txt                   # Dependency specifications
 ├── .env.example                       # Environment configuration template
 ├── .gitignore                         # Python/IDE/FAISS/Owlready2 ignores
@@ -99,11 +103,16 @@ class WorkflowState(TypedDict):
     patient_id: str
     conditions: List[str]
     clinical_notes: str
+    vitals: Optional[Dict[str, Any]]
     retrieved_evidence: str
+    retrieved_docs: List[Dict[str, Any]]
+    inferred_diagnosis: List[str]
+    proposed_treatment: Optional[str]
     proposed_drug: Optional[str]
     hypothesis: Optional[Dict[str, Any]]
     verification_result: Optional[Dict[str, Any]]
     axiom_feedback: List[str]
+    attempts_history: List[Dict[str, Any]]
     retries: int
     max_retries: int
     status: str       # "PENDING" | "APPROVED" | "ESCALATED_TO_HUMAN"
@@ -121,8 +130,8 @@ class WorkflowState(TypedDict):
 [node_retrieve] (FR2: FAISS + BM25 + RRF)
    │
    ▼
-[node_generate] (FR3: Ollama / LLaMA-3.2:3b + Pydantic) ◄─────────┐
-   │                                                               │ (Retry Loop)
+[node_generate] (FR3: Ollama / Dynamic Proposer + Pydantic) ◄──────┐
+   │                                                               │ (Retry Loop, max 3)
    ▼                                                               │
 [node_verify] (FR4: HermiT DL Reasoner in isolated world)          │
    │                                                               │
@@ -137,12 +146,13 @@ class WorkflowState(TypedDict):
 
 ## 6. Guidelines for Collaborating Developers & AI Agents
 
-1. **Keep Fallbacks Functional**:
-   The modules in `src/` include lightweight deterministic fallbacks so developers on new machines without Ollama or Java installed can run tests immediately. Always preserve and maintain these fallback paths.
+1. **Keep Fallbacks Functional & Dynamic**:
+   Dynamic reasoning handles offline environments gracefully without static mocks or hardcoded patient IDs.
 2. **Windows Console Encoding**:
-   When printing status symbols to stdout, avoid Unicode characters that trigger `charmap` codec errors on Windows CP1252 consoles. Use ASCII tags like `[OK]`, `[PASS]`, `[FAIL]`, `[INFO]`.
+   When printing status symbols to stdout, avoid Unicode characters that trigger `charmap` codec errors on Windows consoles. Use ASCII tags like `[OK]`, `[PASS]`, `[FAIL]`, `[INFO]`.
 3. **Commit Clean Code**:
    - Run `python test_retrieval.py`
-   - Run `python main.py`
+   - Run `python tests/test_api.py`
    - Run `python -m src.evaluation.run_benchmark`
-   Ensure all three commands exit with return code `0` before committing changes.
+   - Run `python main.py`
+   Ensure all commands exit with return code `0` before committing changes.

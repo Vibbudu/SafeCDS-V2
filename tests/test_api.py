@@ -37,16 +37,19 @@ def test_patient_evaluation_safe():
         "conditions": ["CKD_Stage_4_5", "Hypertension"],
         "clinical_notes": "Patient with Stage 5 CKD and severe hypertension.",
         "vitals": {"egfr": 14, "sbp": 165, "hba1c": 8.5},
-        "max_retries": 2,
+        "max_retries": 3,
     }
     res = client.post("/api/evaluate", json=payload)
     assert res.status_code == 200
     data = res.json()
     assert data["status"] == "APPROVED"
     assert data["approved_drug"] in ["Amlodipine", "Insulin"]
+    assert "inferred_diagnosis" in data
+    assert len(data["inferred_diagnosis"]) > 0
+    assert "proposed_treatment" in data
     assert "safety_certificate" in data
     assert data["safety_certificate"]["formal_escape_rate"] == 0.0
-    print(f"[OK] /api/evaluate PT_002 test passed (Approved: {data['approved_drug']}).")
+    print(f"[OK] /api/evaluate PT_002 test passed (Approved: {data['approved_drug']}, Diagnosis: {data['inferred_diagnosis']}).")
 
 
 def test_ontology_endpoint():
@@ -77,11 +80,22 @@ def test_root_serves_html():
     print(f"[OK] GET / index.html test passed ({len(res.text)} bytes).")
 
 
+def test_benchmark_results_endpoint():
+    res = client.get("/api/benchmark-results")
+    assert res.status_code == 200
+    data = res.json()
+    assert "benchmark_metadata" in data
+    assert "cohort_trajectories" in data
+    assert data["benchmark_metadata"]["formal_contraindication_escape_rate"] == "0.0%"
+    print(f"[OK] /api/benchmark-results test passed (Escape Rate: {data['benchmark_metadata']['formal_contraindication_escape_rate']}).")
+
+
 if __name__ == "__main__":
     test_system_status()
     test_patients_list()
     test_patient_evaluation_safe()
     test_ontology_endpoint()
     test_guidelines_endpoint()
+    test_benchmark_results_endpoint()
     test_root_serves_html()
     print("\n[OK] ALL API TESTS PASSED SUCCESSFULLY!")

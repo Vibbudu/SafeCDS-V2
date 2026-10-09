@@ -1,4 +1,4 @@
-"""SafeCDS V2: Single-Patient Clinical Decision Support Demonstration Runner (FR1-FR7)."""
+"""SafeCDS V2: Single-Patient Clinical Diagnosis & Decision Support Demonstration Runner (FR1-FR7)."""
 
 import argparse
 import json
@@ -16,6 +16,7 @@ def run_single_patient(
     patient_id: str = "PT_002",
     conditions: List[str] = None,
     clinical_notes: str = None,
+    vitals: dict = None,
 ):
     """Run an individual patient through the SafeCDS neuro-symbolic pipeline."""
     if conditions is None:
@@ -23,30 +24,35 @@ def run_single_patient(
     if clinical_notes is None:
         clinical_notes = (
             "Elderly patient with Stage 5 Chronic Kidney Disease (eGFR 14 mL/min/1.73m2) "
-            "and uncontrolled systolic hypertension (165/95 mmHg)."
+            "and Stage 2 Essential Hypertension (165/95 mmHg)."
         )
+    if vitals is None:
+        vitals = {"egfr": 14, "sbp": 165, "dbp": 95, "hba1c": 5.6}
 
     print("=" * 80)
     print(" SafeCDS: Neuro-Symbolic Agentic Clinical Decision Support (v2.0)")
     print("=" * 80)
     print(f"[*] Patient Identifier: {patient_id}")
-    print(f"[*] Conditions:         {', '.join(conditions)}")
-    print(f"[*] Clinical Summary:   {clinical_notes}")
+    print(f"[*] Clinical Profile:   {', '.join(conditions)}")
+    print(f"[*] Lab Panels / Vitals: eGFR={vitals.get('egfr')}, SBP={vitals.get('sbp')}, HbA1c={vitals.get('hba1c')}")
+    print(f"[*] Clinical Notes:     {clinical_notes}")
     print("-" * 80)
 
-    workflow = SafeCDSWorkflow(max_retries=2)
+    workflow = SafeCDSWorkflow(max_retries=3)
 
     initial_state: WorkflowState = {
         "patient_id": patient_id,
         "conditions": conditions,
         "clinical_notes": clinical_notes,
+        "vitals": vitals,
         "retrieved_evidence": "",
         "proposed_drug": None,
+        "proposed_treatment": None,
         "hypothesis": None,
         "verification_result": None,
         "axiom_feedback": [],
         "retries": 0,
-        "max_retries": 2,
+        "max_retries": 3,
         "status": "PENDING",
         "audit_trail": [],
     }
@@ -56,7 +62,8 @@ def run_single_patient(
     print("\n[+] PIPELINE EXECUTION COMPLETED")
     print("-" * 80)
     print(f"Final Decision Status: {final_state['status']}")
-    print(f"Final Prescribed Drug: {final_state.get('proposed_drug')}")
+    print(f"Verified Diagnosis:    {', '.join(final_state.get('inferred_diagnosis', []))}")
+    print(f"Approved Prescription: {final_state.get('proposed_drug') or final_state.get('proposed_treatment')}")
     print(f"Total Retries/Attempts:{final_state['retries']} retries (Attempts: {final_state['retries'] + 1})")
 
     hypothesis = final_state.get("hypothesis") or {}
@@ -73,13 +80,13 @@ def run_single_patient(
             print(f"  [2. RETRIEVAL]    Retrieved {step.get('evidence_length', 0)} chars of guideline evidence.")
         elif stage == "GENERATION":
             proposal = step.get("proposal", {})
-            print(f"  [3. GENERATION]   Attempt {step.get('attempt')}: Proposing {proposal.get('recommended_drug')}")
+            print(f"  [3. GENERATION]   Attempt {step.get('attempt')}: Inferred={proposal.get('diagnosis')} | Proposing {proposal.get('proposed_treatment')}")
         elif stage == "VERIFICATION":
             print(f"  [4. VERIFICATION] Attempt {step.get('attempt')}: Status={step.get('status')}, Violated={step.get('violated_axioms', [])}")
         elif stage == "FEEDBACK_INJECTION":
             print(f"  [5. SELF-CORRECT] Feedback: {step.get('feedback')}")
         elif stage == "FINALIZATION":
-            print(f"  [6. FINALIZATION] Approved Drug: {step.get('approved_drug')}")
+            print(f"  [6. FINALIZATION] Approved Prescription: {step.get('approved_treatment') or step.get('approved_drug')}")
         elif stage == "ESCALATION":
             print(f"  [6. ESCALATION]   Escalated to human review: {step.get('reason')}")
 

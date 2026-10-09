@@ -32,7 +32,7 @@ ONTOLOGY_PATH = BASE_DIR / "ontologies" / "cardiometabolic_core.owl"
 verifier = ClinicalVerifier(ontology_path=str(ONTOLOGY_PATH))
 retriever = HybridClinicalRetriever(guidelines_path=str(GUIDELINES_PATH))
 llm_agent = LLMClinicalAgent()
-workflow = SafeCDSWorkflow(retriever=retriever, llm_agent=llm_agent, verifier=verifier)
+workflow = SafeCDSWorkflow(retriever=retriever, llm_agent=llm_agent, verifier=verifier, max_retries=3)
 
 app = FastAPI(
     title="SafeCDS V2: Neuro-Symbolic Agentic Decision Support",
@@ -46,7 +46,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)
+    )
 
 
 # --- Request & Response Schemas ---
@@ -56,7 +56,7 @@ class PatientEvaluationRequest(BaseModel):
     conditions: List[str] = Field(default_factory=lambda: ["CKD_Stage_4_5", "Hypertension"])
     clinical_notes: str = Field(default="", description="Clinical notes, history, or presentation narrative")
     vitals: Optional[Dict[str, Any]] = Field(default_factory=dict, description="eGFR, BP, HbA1c, etc.")
-    max_retries: int = Field(default=2, ge=1, le=5)
+    max_retries: int = Field(default=3, ge=1, le=5)
 
 
 # --- API Endpoints ---
@@ -72,7 +72,7 @@ def get_system_status():
             "name": "HermiT OWL 2 DL Reasoner",
             "ontology_file": ONTOLOGY_PATH.name,
             "isolation_mode": "EPHEMERAL_WORLD_PER_TRIAL",
-            "mathematical_guarantee": "Sound & Complete DL Reasoning",
+            "mathematical_guarantee": "Sound & Complete DL Reasoning (0.0% Formal Escape Rate)",
         },
         "llm": llm_status,
         "retrieval": {
@@ -102,8 +102,11 @@ def evaluate_patient_case(payload: PatientEvaluationRequest):
         "patient_id": payload.patient_id.strip(),
         "conditions": payload.conditions,
         "clinical_notes": payload.clinical_notes,
+        "vitals": payload.vitals or {},
         "retrieved_evidence": "",
         "retrieved_docs": [],
+        "inferred_diagnosis": [],
+        "proposed_treatment": None,
         "proposed_drug": None,
         "hypothesis": None,
         "verification_result": None,
@@ -124,6 +127,7 @@ def evaluate_patient_case(payload: PatientEvaluationRequest):
     elapsed_ms = round((time.perf_counter() - start_time) * 1000, 2)
     attempts_history = final_state.get("attempts_history", [])
     total_attempts = len(attempts_history) if attempts_history else (final_state.get("retries", 0) + 1)
+    approved_med = final_state.get("proposed_drug") or final_state.get("proposed_treatment")
 
     return {
         "patient_id": final_state.get("patient_id"),
@@ -131,7 +135,9 @@ def evaluate_patient_case(payload: PatientEvaluationRequest):
         "clinical_notes": final_state.get("clinical_notes"),
         "vitals": payload.vitals,
         "status": final_state.get("status"),
-        "approved_drug": final_state.get("proposed_drug"),
+        "inferred_diagnosis": final_state.get("inferred_diagnosis", []),
+        "proposed_treatment": final_state.get("proposed_treatment"),
+        "approved_drug": approved_med,
         "final_hypothesis": final_state.get("hypothesis"),
         "verification_result": final_state.get("verification_result"),
         "retrieved_docs": final_state.get("retrieved_docs", []),
@@ -164,6 +170,17 @@ def run_benchmark_suite():
     except Exception as e:
         logger.error("Benchmark runner error: %s", e, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Benchmark execution failed: {str(e)}")
+
+
+@app.get("/api/benchmark-results")
+@app.get("/results/cohort_benchmark_results.json")
+def get_latest_benchmark_results():
+    """Return the most recently generated benchmark results JSON."""
+    results_file = BASE_DIR / "results" / "cohort_benchmark_results.json"
+    if not results_file.exists():
+        raise HTTPException(status_code=404, detail="Benchmark results not found. Run benchmark first.")
+    with open(results_file, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 @app.get("/api/ontology")

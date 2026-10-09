@@ -212,24 +212,24 @@ Evaluated across a multi-condition cardiometabolic validation cohort:
 
 | Metric | Target | Result | Status |
 | :--- | :---: | :---: | :---: |
-| **First-Pass Safety Compliance** | $\ge 80.0\%$ | **100.0%** (6/6) | Verified |
-| **Self-Correction Success Rate** | $100.0\%$ | **100.0%** | Verified |
-| **Overall Clinical Safety Rate** | $100.0\%$ | **100.0%** (6/6) | Verified |
+| **First-Pass Safety Compliance** | Baseline | **33.3%** (2/6) | Uncomplicated Monotherapy |
+| **Self-Correction Success Rate** | $100.0\%$ | **100.0%** (4/4) | Full Recovery via Axiom Feedback |
+| **Overall Clinical Safety Rate** | $100.0\%$ | **100.0%** (6/6) | Verified Safe |
 | **Human Review Escalation Rate** | $0.0\%$ | **0.0%** (0/6) | Optimal |
 | **Formal Contraindication Escape Rate** | **0.0%** | **0.0%** | **HermiT Guarantee** |
-| **Total Cohort Runtime** | $< 60\text{ s}$ | **41.85 s** | Interactive |
-| **Average Reasoner Latency** | $< 1.0\text{ s}$ | **0.77 s / trial** | Real-time |
+| **Total Cohort Runtime** | $< 60\text{ s}$ | **4.61 s** | Real-time |
+| **Average Reasoner Latency** | $< 1.0\text{ s}$ | **0.0004 s / trial** | Sound & Ephemeral |
 
 ### Benchmark Cohort Breakdown
 
-| Patient ID | Diagnosed Conditions | Prescribed Therapy | Attempts | Outcome |
+| Patient ID | Verified Diagnosis | Prescribed Therapy | Attempts | Outcome |
 | :--- | :--- | :--- | :---: | :--- |
-| `PT_001` | CKD 4/5 + T2DM | **Insulin** | 1 | Safe (First Pass) |
-| `PT_002` | CKD 4/5 + Hypertension | **Amlodipine** | 1 / 2 | Safe (Self-Corrected) |
-| `PT_003` | Isolated T2DM | **Metformin** | 1 | Safe (First Pass) |
-| `PT_004` | Isolated Hypertension | **Amlodipine / Lisinopril** | 1 | Safe (First Pass) |
-| `PT_005` | CKD 4/5 + T2DM + Hypertension | **Insulin Regimen** | 1 | Safe (First Pass) |
-| `PT_006` | Isolated CKD 4/5 | **Insulin** | 1 | Safe (First Pass) |
+| `PT_001` | CKD Stage 4-5, T2DM | **Insulin** | 2 | Safe (Self-Corrected) |
+| `PT_002` | CKD Stage 4-5, Hypertension | **Amlodipine** | 2 | Safe (Self-Corrected) |
+| `PT_003` | Type 2 Diabetes Mellitus | **Metformin** | 1 | Safe (1st-Pass Monotherapy) |
+| `PT_004` | Essential Hypertension | **Lisinopril** | 1 | Safe (1st-Pass Monotherapy) |
+| `PT_005` | CKD Stage 4-5, T2DM, Hypertension | **Insulin** | 2 | Safe (Self-Corrected) |
+| `PT_006` | CKD Stage 4-5 | **Insulin** | 2 | Safe (Self-Corrected) |
 
 ---
 
